@@ -1,0 +1,9 @@
+CS 111 Project 1B
+
+Avirudh Theraja —> 404459059
+
+Everything should work as per the spec.
+If port not specified, assigns 7777 as default behavior.
+my.key contains a aes-128-cfb key generated from https://asecuritysite.com/encryption/keygen
+The bytes sent to the server are sent as one byte at a time.
+ 

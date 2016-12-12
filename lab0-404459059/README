@@ -1,0 +1,16 @@
+CS 111 Project 0
+
+lab0.c --> C code which implements all features in the spec. If segfault is specified, it is either caught (if catch is specified) or 
+the program dies. Hence, Input/output redirection and any reading/writing is not done when segfault is specified.
+
+pointer.png --> Snap shot of gdb inspection of NULL pointer
+
+stack.png --> Snap shot of gdb backtrace when segfault is encountered
+
+Makefile --> Contains make check, make, make clean and make dist.
+
+Make check executes 2 simple tests:
+First one creates and writes to a temp file. It checks if the temp output file gets created and program returns with exit code 0.
+Then it uses the cmp command to make sure the contents of both files are the same.
+
+Second one passes in segfault and catch to the program, then checks if the exit code returned is 3.

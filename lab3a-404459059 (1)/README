@@ -1,0 +1,8 @@
+Name: Avirudh Theraja
+TA: Diyu Zhou
+ID: 404459059
+
+Lab 3A --> CS 111 Fall '16
+
+The 6 csv files generated are identical to the sample csv files. Code includes santiy checking except inodes/blocks dividing evenly as last group can
+have fewer number of inodes/blocks. Superblock struct is copied from ext2_fs.h. Make clean deletes executable, csv files are not included in submission.

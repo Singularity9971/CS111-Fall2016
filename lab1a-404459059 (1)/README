@@ -1,0 +1,9 @@
+CS 111 Project 1a
+
+lab1.c --> Contains all the source code. The I/O operations are done using a buffer of size 1 along with read(2) and write(2).
+Code compiles cleanly with no errors or warnings. All features of the spec should work (unable to test some like ctrl c etc).
+
+Makefile --> make clean, make, make dist. No smoke tests. make clean simply removes the executable file, make dist generates
+the tarball and make generates the executable.
+
+README --> The file you are currently reading :P 

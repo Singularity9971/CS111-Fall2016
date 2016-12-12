@@ -1,0 +1,198 @@
+Total: 334 samples
+     276  82.6%  82.6%      334 100.0% thread_function
+      46  13.8%  96.4%       46  13.8% __strcmp_sse42
+       7   2.1%  98.5%       29   8.7% SortedList_lookup
+       5   1.5% 100.0%       29   8.7% SortedList_insert
+       0   0.0% 100.0%      334 100.0% __clone
+       0   0.0% 100.0%       29   8.7% lookup_delete
+       0   0.0% 100.0%      334 100.0% start_thread
+
+
+ROUTINE ====================== thread_function in /u/ee/ugrad/avirudh/CS111/Project2b/lab2_list.c
+   276    334 Total samples (flat / cumulative)
+     .      .  141:     error("Key was inserted but lookup failed");
+     .      .  142:   if(SortedList_delete(node) != 0)
+     .      .  143:     error("Node was found but couldn't be deleted");
+     .      .  144: }
+     .      .  145: 
+---
+     .      .  146: void* thread_function(void* args){
+     .      .  147:   int end = ((struct threadArgs*)args)->end;
+     .      .  148:   int index = ((struct threadArgs*)args)->index;
+     .      .  149:   free(args);
+     .      .  150:   struct timespec threadStart_time;
+     .      .  151:   struct timespec threadEnd_time;
+     .      .  152:   int start = end - iterations;
+     .      .  153:   int i;
+     .      .  154:   int bucket;
+     .      .  155:   for(i = start; i < end; i++){
+     .      .  156:     bucket = hash((char*)elements[i].key);
+     .      .  157:     if(mutex_locking){
+     .      .  158:       set_time(&threadStart_time);
+     .      .  159:       pthread_mutex_lock(&locks[bucket]);
+     .      .  160:       set_time(&threadEnd_time);
+     .      .  161:       thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  162:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  163:       pthread_mutex_unlock(&locks[bucket]);
+     .      .  164:     }
+     .      .  165:     else if(spin_locking){
+   175    175  166:       while(__sync_lock_test_and_set(&spin_locks[bucket], 1));
+     .     29  167:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  168:       __sync_lock_release(&spin_locks[bucket]);
+     .      .  169:     }
+     .      .  170:     else
+     .      .  171:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  172:   }
+     .      .  173:   if(mutex_locking){
+     .      .  174:     set_time(&threadStart_time);
+     .      .  175:     int j;
+     .      .  176:     for(j = 0; j < lists; j++)
+     .      .  177:       pthread_mutex_lock(&locks[j]);
+     .      .  178:     set_time(&threadEnd_time);
+     .      .  179:     thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  180:     int length = 0;
+     .      .  181:     for(j = 0; j < lists; j++)
+     .      .  182:       length += SortedList_length(&array[j]);
+     .      .  183:     for(j = 0; j < lists; j++)
+     .      .  184:       pthread_mutex_unlock(&locks[j]);
+     .      .  185: 
+     .      .  186:   }
+     .      .  187:   else if(spin_locking){
+     .      .  188:     int j;
+     .      .  189:     for(j = 0; j < lists; j++)
+     .      .  190:       while(__sync_lock_test_and_set(&spin_locks[j], 1));
+     .      .  191:     int length = 0;
+     .      .  192:     for(j = 0; j < lists; j++)
+     .      .  193:       length += SortedList_length(&array[j]);
+     .      .  194:     for(j = 0; j < lists; j++)
+     .      .  195:       __sync_lock_release(&spin_locks[j]);
+     .      .  196:   }
+     .      .  197:   else{
+     .      .  198:     int length = 0;
+     .      .  199:     int j;
+     .      .  200:     for(j = 0; j < lists; j++)
+     .      .  201:       length += SortedList_length(&array[j]);
+     .      .  202:   }
+     .      .  203:     
+     .      .  204:   SortedListElement_t* node = NULL;
+     .      .  205:   for(i = start; i < end; i++){
+     .      .  206:     bucket = hash((char*)elements[i].key);
+     .      .  207:     if(mutex_locking){
+     .      .  208:       set_time(&threadStart_time);
+     .      .  209:       pthread_mutex_lock(&locks[bucket]);
+     .      .  210:       set_time(&threadEnd_time);
+     .      .  211:       thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  212:       lookup_delete(node, bucket, i);
+     .      .  213:       pthread_mutex_unlock(&locks[bucket]);
+     .      .  214:     }
+     .      .  215:     else if(spin_locking){
+   101    101  216:       while(__sync_lock_test_and_set(&spin_locks[bucket], 1));
+     .     29  217:       lookup_delete(node, bucket, i);
+     .      .  218:       __sync_lock_release(&spin_locks[bucket]);
+     .      .  219:     }
+     .      .  220:     else{
+     .      .  221:       lookup_delete(node, bucket, i);
+     .      .  222:     }
+     .      .  223:   }
+     .      .  224:   return NULL;
+     .      .  225: }
+---
+     .      .  226: 
+     .      .  227: void start_process(){
+     .      .  228:   pthread_t threads[num_threads];
+     .      .  229:   set_time(&start_time);
+     .      .  230:   int i;
+ROUTINE ====================== thread_function in /u/ee/ugrad/avirudh/CS111/Project2b/lab2_list.c
+   276    334 Total samples (flat / cumulative)
+     .      .  141:     error("Key was inserted but lookup failed");
+     .      .  142:   if(SortedList_delete(node) != 0)
+     .      .  143:     error("Node was found but couldn't be deleted");
+     .      .  144: }
+     .      .  145: 
+---
+     .      .  146: void* thread_function(void* args){
+     .      .  147:   int end = ((struct threadArgs*)args)->end;
+     .      .  148:   int index = ((struct threadArgs*)args)->index;
+     .      .  149:   free(args);
+     .      .  150:   struct timespec threadStart_time;
+     .      .  151:   struct timespec threadEnd_time;
+     .      .  152:   int start = end - iterations;
+     .      .  153:   int i;
+     .      .  154:   int bucket;
+     .      .  155:   for(i = start; i < end; i++){
+     .      .  156:     bucket = hash((char*)elements[i].key);
+     .      .  157:     if(mutex_locking){
+     .      .  158:       set_time(&threadStart_time);
+     .      .  159:       pthread_mutex_lock(&locks[bucket]);
+     .      .  160:       set_time(&threadEnd_time);
+     .      .  161:       thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  162:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  163:       pthread_mutex_unlock(&locks[bucket]);
+     .      .  164:     }
+     .      .  165:     else if(spin_locking){
+   175    175  166:       while(__sync_lock_test_and_set(&spin_locks[bucket], 1));
+     .     29  167:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  168:       __sync_lock_release(&spin_locks[bucket]);
+     .      .  169:     }
+     .      .  170:     else
+     .      .  171:       SortedList_insert(&array[bucket], &elements[i]);
+     .      .  172:   }
+     .      .  173:   if(mutex_locking){
+     .      .  174:     set_time(&threadStart_time);
+     .      .  175:     int j;
+     .      .  176:     for(j = 0; j < lists; j++)
+     .      .  177:       pthread_mutex_lock(&locks[j]);
+     .      .  178:     set_time(&threadEnd_time);
+     .      .  179:     thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  180:     int length = 0;
+     .      .  181:     for(j = 0; j < lists; j++)
+     .      .  182:       length += SortedList_length(&array[j]);
+     .      .  183:     for(j = 0; j < lists; j++)
+     .      .  184:       pthread_mutex_unlock(&locks[j]);
+     .      .  185: 
+     .      .  186:   }
+     .      .  187:   else if(spin_locking){
+     .      .  188:     int j;
+     .      .  189:     for(j = 0; j < lists; j++)
+     .      .  190:       while(__sync_lock_test_and_set(&spin_locks[j], 1));
+     .      .  191:     int length = 0;
+     .      .  192:     for(j = 0; j < lists; j++)
+     .      .  193:       length += SortedList_length(&array[j]);
+     .      .  194:     for(j = 0; j < lists; j++)
+     .      .  195:       __sync_lock_release(&spin_locks[j]);
+     .      .  196:   }
+     .      .  197:   else{
+     .      .  198:     int length = 0;
+     .      .  199:     int j;
+     .      .  200:     for(j = 0; j < lists; j++)
+     .      .  201:       length += SortedList_length(&array[j]);
+     .      .  202:   }
+     .      .  203:     
+     .      .  204:   SortedListElement_t* node = NULL;
+     .      .  205:   for(i = start; i < end; i++){
+     .      .  206:     bucket = hash((char*)elements[i].key);
+     .      .  207:     if(mutex_locking){
+     .      .  208:       set_time(&threadStart_time);
+     .      .  209:       pthread_mutex_lock(&locks[bucket]);
+     .      .  210:       set_time(&threadEnd_time);
+     .      .  211:       thread_array[index] += get_time_lapse(&threadStart_time, &threadEnd_time);
+     .      .  212:       lookup_delete(node, bucket, i);
+     .      .  213:       pthread_mutex_unlock(&locks[bucket]);
+     .      .  214:     }
+     .      .  215:     else if(spin_locking){
+   101    101  216:       while(__sync_lock_test_and_set(&spin_locks[bucket], 1));
+     .     29  217:       lookup_delete(node, bucket, i);
+     .      .  218:       __sync_lock_release(&spin_locks[bucket]);
+     .      .  219:     }
+     .      .  220:     else{
+     .      .  221:       lookup_delete(node, bucket, i);
+     .      .  222:     }
+     .      .  223:   }
+     .      .  224:   return NULL;
+     .      .  225: }
+---
+     .      .  226: 
+     .      .  227: void start_process(){
+     .      .  228:   pthread_t threads[num_threads];
+     .      .  229:   set_time(&start_time);
+     .      .  230:   int i;
